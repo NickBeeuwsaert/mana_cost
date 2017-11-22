@@ -19,3 +19,8 @@ a bug about it.
 
 Colorless mana {C} and Snow Mana {S} aren't current supported, since {C} can just be represented with {1}
 and I don't like {S}
+
+Disclaimer
+----------
+Right now this project should be considered to be alpha, which means that some comparisons might return
+unintuitive results. Results of comparisons will likely change in the future as I add more test cases.
