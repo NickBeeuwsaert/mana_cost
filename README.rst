@@ -1,5 +1,5 @@
-A library to compare Magic: the Gathering|trade| Mana Costs
-===========================================================
+A library to compare Magic: the Gathering mana Costs
+====================================================
 This is a small library for comparing MTG mana costs.
 
 Usage
@@ -24,3 +24,5 @@ Disclaimer
 ----------
 Right now this project should be considered to be alpha, which means that some comparisons might return
 unintuitive results. Results of comparisons will likely change in the future as I add more test cases.
+The way mana is compared is probably subject to change as well, as I suspect there are better ways to
+do the comparison.
