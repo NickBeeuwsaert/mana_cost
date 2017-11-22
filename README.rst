@@ -1,4 +1,4 @@
-A library to compant Magic: the Gathering|trade| Mana Costs
+A library to compare Magic: the Gathering|trade| Mana Costs
 ===========================================================
 This is a small library for comparing MTG mana costs.
 
