@@ -1,5 +1,8 @@
 /.tox/
 /venv/
+/.mypy_cache/
+/.cache/
+/.vscode/
 
 __pycache__/
 

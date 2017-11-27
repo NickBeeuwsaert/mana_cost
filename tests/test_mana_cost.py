@@ -1,6 +1,6 @@
 import pytest
 
-from mana_cost import ManaCost
+from mana_cost import ManaCost, ComparableCounter
 
 
 @pytest.mark.parametrize(
@@ -75,3 +75,34 @@ def test_min_and_max(mana_cost, min, max):
 )
 def test_variations(mana_cost, num_variations):
     assert ManaCost(mana_cost).num_variations == num_variations
+
+
+def test_comparision_work():
+    R = ComparableCounter('R')
+    G = ComparableCounter('G')
+    RR = ComparableCounter('RR')
+
+    # Less than
+    assert (RR < R) is False, "{R}{R} cannot be paid for with {R}"
+    assert (RR < G) is False, "{R}{R} cannot be paid for with {G}"
+
+    assert (R < RR) is True, "{R} can be paid for with {R}{R}"
+    assert (G < RR) is False, "{G} cannot be paid for with {R}{R}"
+
+    # Greater than
+    # assert (RR > R) is True, "{R}{R} is greater than {R}"
+    # assert (RR > G) is True, "{R}{R} is greater than {G}"
+
+    # assert (R > RR) is False, "{R} is not greater than {R}{R}"
+    # assert (G > RR) is True, "{G} is greater than {R}{R}"
+
+    # Check results are consistent with above
+    assert (ManaCost('{R}{R}') < ManaCost('{R/G}')) is False, \
+        "{R}{R} is more than enough to pay for {R/G}"
+    assert (ManaCost('{R/G}') < ManaCost('{R}{R}')) is True, \
+        "{R/G} isn't enough to pay for {R}{R}"
+
+    assert (ManaCost('{R}{R}') > ManaCost('{R/G}')) is True, \
+        "{R}{R} is greater than {R/G}"
+    assert (ManaCost('{R/G}') > ManaCost('{R}{R}')) is False, \
+        "{R/G} is greater than {R}{R} ({G} > {R}{R})"

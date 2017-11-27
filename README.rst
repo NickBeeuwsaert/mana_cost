@@ -13,12 +13,11 @@ For example:
 - {2/R} represents a mana cost you can pay with 1 mana of any color, or 1 red mana
 - {R/B} represents a mana cost you can pay with either red or black maa
 
-Because the primary purpose of this library is to search through mana costs, {P} and {X}
+Because the primary purpose of this library is to search through mana costs, {P}, {C} and {X}
 are treated as their own types of mana (even though they are not types of mana). Please dont file
 a bug about it.
 
-Colorless mana {C} and Snow Mana {S} aren't current supported, since {C} can just be represented with {1}
-and I don't like {S}
+Snow Mana ({S}) isn't supported, since I don't like {S}
 
 Disclaimer
 ----------

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import re
 from itertools import product
-from functools import reduce
+from functools import reduce, total_ordering
 import collections
 import operator
 
@@ -10,7 +10,7 @@ __all__ = [
     'ManaCost',
 ]
 
-base_mana_re = r'(?:[RUBGWPX]|\d+)'
+base_mana_re = r'(?:[RUBGWCPX]|\d+)'
 mana_list_re = re.compile(r'\{{({base_mana_re}(?:/{base_mana_re})*)\}}'.format(
     base_mana_re=base_mana_re
 ))
@@ -23,13 +23,8 @@ class ComparableCounter(collections.Counter):
     def __le__(self, rhs):
         return all(v <= rhs[k] for k, v in self.items())
 
-    def __gt__(self, rhs):
-        return all(v > rhs[k] for k, v in self.items())
 
-    def __ge__(self, rhs):
-        return all(v >= rhs[k] for k, v in self.items())
-
-
+@total_ordering
 class ManaCost:
     def __init__(self, mana_cost):
         self._mana_cost = mana_cost
@@ -106,20 +101,6 @@ class ManaCost:
     def __le__(self, rhs):
         return any(
             left <= right
-            for left in self.combinations
-            for right in rhs.combinations
-        )
-
-    def __gt__(self, rhs):
-        return any(
-            left > right
-            for left in self.combinations
-            for right in rhs.combinations
-        )
-
-    def __ge__(self, rhs):
-        return any(
-            left >= right
             for left in self.combinations
             for right in rhs.combinations
         )
