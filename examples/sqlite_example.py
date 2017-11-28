@@ -125,24 +125,33 @@ def query(args):
     cursor = connection.execute(args.query)
     results = cursor.fetchall()
     elapsed += time.perf_counter()
-    result_widths = tuple(
-        max(len(str(value)) for value in col)
-        for col in zip(*results)
+    column_names = [col_name for col_name, *_ in cursor.description]
+
+    column_widths = tuple(
+        max(pair)
+        for pair in zip(
+            (max(len(str(value)) for value in col) for col in zip(*results)),
+            (len(col) for col in column_names)
+        )
     )
 
-    separator = '+{}+'.format(
-        "+".join("-"*(width+2) for width in result_widths)
-    )
+    def separator(ch='-'):
+        return '+{}+'.format(
+            '+'.join(ch*(width+2) for width in column_widths)
+        )
 
-    print(separator)
-    for row in results:
-        print('| {} |'.format(
-            ' | '.join(
-                str(data).ljust(width)
-                for data, width in zip(row, result_widths)
-            )
+    def display_row(row):
+        return '| {} |'.format(' | '.join(
+            str(data).ljust(width)
+            for data, width in zip(row, column_widths)
         ))
-        print(separator)
+
+    print(separator())
+    print(display_row(column_names))
+    print(separator('='))
+    for row in results:
+        print(display_row(row))
+        print(separator())
     print(f"Fetched {len(results)} rows in {elapsed:.4} seconds.")
 
 

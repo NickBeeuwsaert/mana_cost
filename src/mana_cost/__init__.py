@@ -24,6 +24,17 @@ class ComparableCounter(collections.Counter):
         return all(v <= rhs[k] for k, v in self.items())
 
 
+def _group_cost(mana_group):
+    for variation in mana_group:
+        if variation in ('P', 'X'):
+            continue
+
+        try:
+            yield int(variation)
+        except ValueError:
+            yield 1
+
+
 @total_ordering
 class ManaCost:
     def __init__(self, mana_cost):
@@ -44,25 +55,16 @@ class ManaCost:
     def min_mana_cost(self):
         return sum(
             min(
-                int(variation) if variation.isdigit() else 1
-                for variation in mana
-                # Skip 'P' and 'X' variations since they are not actually mana
-                # although `combinations` treats them like mana
-                # for the purposes of searching
-                if variation not in ('P', 'X')
-            )
-            for mana in self._parsed_mana
+                _group_cost(mana_group)
+            ) for mana_group in self._parsed_mana
         )
 
     @property
     def max_mana_cost(self):
         return sum(
             max(
-                int(variation) if variation.isdigit() else 1
-                for variation in mana
-                if variation not in ('P', 'X')
-            )
-            for mana in self._parsed_mana
+                _group_cost(mana_group)
+            ) for mana_group in self._parsed_mana
         )
 
     @property
