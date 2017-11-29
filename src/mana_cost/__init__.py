@@ -35,7 +35,6 @@ def _group_cost(mana_group):
             yield 1
 
 
-@total_ordering
 class ManaCost:
     def __init__(self, mana_cost):
         self._mana_cost = mana_cost
