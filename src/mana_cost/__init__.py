@@ -54,7 +54,8 @@ class ManaCost:
     def min_mana_cost(self):
         return sum(
             min(
-                _group_cost(mana_group)
+                _group_cost(mana_group),
+                default=0
             ) for mana_group in self._parsed_mana
         )
 
@@ -62,7 +63,8 @@ class ManaCost:
     def max_mana_cost(self):
         return sum(
             max(
-                _group_cost(mana_group)
+                _group_cost(mana_group),
+                default=0
             ) for mana_group in self._parsed_mana
         )
 

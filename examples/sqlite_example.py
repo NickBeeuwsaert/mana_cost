@@ -20,22 +20,14 @@ all cards that match {1/2/3/4/5}{1/2/3/4/5}{1/2/3/4/5}{1/2/3/4/5}, then
 your database might take an exceeding long time to complete a query
 since it could potentially test 5**4 or 625 different mana variations
 against each card.
-
-Example Usage:
-# Importing data from the MTGJSJON project:
-sqlite_example.py my_database.sqlite3 import AllCards.json
-
-# querying cards
-$ sqlite_example.py my_database.sqlite3 \\
-> query "SELECT * FROM cards WHERE mana_lt('{50000}', mana_cost)
-$ sqlite_example.py my_database.sqlite3 \\
-> query "SELECT * FROM cards WHERE mana_lt('{5/W}', mana_cost)
 """
 import argparse
 import sqlite3
 import json
 import time
 import functools
+import itertools
+import textwrap
 import io
 
 from mana_cost import ManaCost as ManaCostBase
@@ -72,7 +64,7 @@ class ManaCost(ManaCostBase):
         return list(super().combinations)
 
 
-def _print_results(cursor):
+def _print_results(cursor, col_max_width=40):
     columns = [
         name
         for name, *_ in cursor.description
@@ -84,7 +76,7 @@ def _print_results(cursor):
         for column in zip(*rows)
     ]
 
-    widths = [max(pair) for pair in zip(column_widths, row_widths)]
+    widths = [min(col_max_width, max(pair)) for pair in zip(column_widths, row_widths)]
 
     row_separator = '+-{}-+'.format(
         '-+-'.join('-'*width for width in widths)
@@ -94,12 +86,18 @@ def _print_results(cursor):
     )
 
     def format_row(row):
-        return '| {} |'.format(
-            ' | '.join(
-                str(cell).ljust(width) for cell, width in zip(row, widths)
-            )
+        wrapped_row = tuple(
+            textwrap.wrap(str(data), col_max_width) for data in row
         )
 
+        return '\n'.join(
+            '| {} |'.format(
+                ' | '.join(
+                    str(data).ljust(width) for data, width in zip(row, widths)
+                )
+            )
+            for row in itertools.zip_longest(*wrapped_row, fillvalue='')
+        )
     print(header_separator)
     print(format_row(columns))
     print(header_separator)
@@ -261,7 +259,7 @@ def query(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(usage=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('db', type=sqlite3.connect)
     subparsers = parser.add_subparsers(dest='subcommand')
     subparsers.required = True
@@ -270,7 +268,25 @@ if __name__ == '__main__':
     import_parser.add_argument('card_data', type=argparse.FileType('r'))
     import_parser.set_defaults(func=import_data)
 
-    query_parser = subparsers.add_parser('query')
+    query_parser = subparsers.add_parser(
+        'query',
+        usage=textwrap.dedent('''\
+
+            Examples queries:
+
+            Find top 10 most expensive cards:
+
+            > SELECT * FROM cards ORDER BY mana_max(mana_cost) DESC LIMIT 10
+
+            Find any cards that cost Phyrexian mana or Colorless mana:
+
+            > SELECT * FROM cards WHERE mana_ge(mana_cost, '{P/C}')
+
+            Find any cards that cost at least 1 red and 2 black mana
+
+            > SELECT * FROM cards WHERE mana_ge(mana_cost, '{R}{B}{B}')
+        ''')
+    )
     query_parser.add_argument(
         'query',
         nargs='?',
